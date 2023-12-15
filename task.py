@@ -1,216 +1,40 @@
-
-import threading
-from boxPlot import visualize_boxplot
-from histogram import visualize_individual_column
-from pieChart import visualize_pie_chart
-from scatterPlot import visualize_scatterplot
-
+import concurrent.futures
+from DataVisualizer import DataVisualizer
 from utils import load_data, preprocess_data
+import threading
+
+data = None
 
 
-def main():
+def load_and_preprocess_data():
     while True:
         try:
             file_path = input("Enter the path to the data file: ")
-            data = load_data(file_path)
+
+            # Define a variable to store the loaded data
+            loaded_data = None
+
+            # Function to load data in a separate thread
+            def load_data_thread():
+                nonlocal loaded_data
+                loaded_data = load_data(file_path)
+
+            # Start loading data in a separate thread
+            load_data_thread = threading.Thread(target=load_data_thread)
+            load_data_thread.start()
+
+            # Wait for the data loading thread to finish
+            load_data_thread.join()
+
+            # Print the loaded data
             print("\nDataFrame:")
-            print(data)
-            preprocessed_data = preprocess_data(data)
+            print(loaded_data)
+            global data
+            data = loaded_data
 
-            while True:
-                print("\nVisualization Options:")
-                print("1. Visualize Histogram ")
-                print("2. Visualize Box Plot ")
-                print("3. Visualize Scatter Plot ")
-                print("4. Visualize Pie Chart ")
-                print("5. Exit ")
-
-                choice = int(
-                    input(
-                        "Enter the number corresponding to the visualization option you want to choose: "
-                    )
-                )
-
-                if choice == 5:
-                    break
-                elif choice == 1:
-                    try:
-                        type = int(
-                            input("\nChoose type:\n1. header, 2. column values: ")
-                        )
-                        if type == 2:
-                            data = preprocessed_data
-                        elif type != 1:
-                            raise ValueError
-                    except ValueError:
-                        print("Invalid input. Please enter either 1 or 2.")
-                        choice = input(
-                            "Enter 'exit' to quit or press any key to try again: "
-                        )
-                        if choice.lower() == "exit":
-                            exit()
-                    print("\nAvailable Columns:")
-                    for i, column in enumerate(data.columns):
-                        print(f"{i}. {column}")
-
-                    column_choice = int(
-                        input(
-                            "Enter the number corresponding to the column you want to visualize: "
-                        )
-                    )
-                    if 0 <= column_choice < len(data.columns):
-                        column = data.columns[column_choice]
-                        # visualize_individual_column(data, column)
-                        # use threading for visualization
-                        thread = threading.Thread(
-                            target=visualize_individual_column,
-                            args=(
-                                data,
-                                column,
-                            ),
-                        )
-                        thread.start()
-                    else:
-                        print("Invalid choice. Please try again.")
-
-                    if not try_another_visualization():
-                        break
-                elif choice == 2:
-                    while True:
-                        try:
-                            type = int(
-                                input(
-                                    "\nChoose comparison type:\n1. Compare between two headers, 2. Compare between two column values: "
-                                )
-                            )
-                            if type == 2:
-                                data = preprocessed_data
-                            elif type != 1:
-                                raise ValueError
-                        except ValueError:
-                            print("Invalid input. Please enter either 1 or 2.")
-                            choice = input(
-                                "Enter 'exit' to quit or press any key to try again: "
-                            )
-                            if choice.lower() == "exit":
-                                exit()
-                        print("\nAvailable Columns:")
-                        for i, column in enumerate(data.columns):
-                            print(f"{i}. {column}")
-
-                        x_column_choice = int(
-                            input(
-                                "Enter the number corresponding to the x-axis column: "
-                            )
-                        )
-                        y_column_choice = int(
-                            input(
-                                "Enter the number corresponding to the y-axis column: "
-                            )
-                        )
-                        if 0 <= x_column_choice < len(
-                            data.columns
-                        ) and 0 <= y_column_choice < len(data.columns):
-                            x_column = data.columns[x_column_choice]
-                            y_column = data.columns[y_column_choice]
-                            # visualize_boxplot(data, x_column, y_column)
-                            thread = threading.Thread(
-                                target=visualize_boxplot,
-                                args=(
-                                    data,
-                                    x_column,
-                                    y_column,
-                                ),
-                            )
-                            thread.start()
-                            if not try_another_visualization():
-                                break
-                        else:
-                            print("Invalid choice. Please try again.")
-                elif choice == 3:
-                    try:
-                        type = int(
-                            input(
-                                "\nChoose comparison type:\n1. Compare between two headers, 2. Compare between two column values: "
-                            )
-                        )
-                        if type == 2:
-                            data = preprocessed_data
-                        elif type != 1:
-                            raise ValueError
-                    except ValueError:
-                        print("Invalid input. Please enter either 1 or 2.\n")
-                    print("\nAvailable Columns:")
-                    for i, column in enumerate(data.columns):
-                        print(f"{i}. {column}")
-
-                    x_column_choice = int(
-                        input("Enter the number corresponding to the x-axis column: ")
-                    )
-                    y_column_choice = int(
-                        input("Enter the number corresponding to the y-axis column: ")
-                    )
-                    if 0 <= x_column_choice < len(
-                        data.columns
-                    ) and 0 <= y_column_choice < len(data.columns):
-                        x_column = data.columns[x_column_choice]
-                        y_column = data.columns[y_column_choice]
-                        # visualize_scatterplot(data, x_column, y_column)
-                        thread = threading.Thread(
-                            target=visualize_scatterplot,
-                            args=(
-                                data,
-                                x_column,
-                                y_column,
-                            ),
-                        )
-                        thread.start()
-                        if not try_another_visualization():
-                            break
-                    else:
-                        print("Invalid choice. Please try again.")
-                elif choice == 4:
-                    try:
-                        type = int(
-                            input("\nChoose type:\n1. header, 2. column values: ")
-                        )
-                        if type == 2:
-                            data = preprocessed_data
-                        elif type != 1:
-                            raise ValueError
-                    except ValueError:
-                        print("Invalid input. Please enter either 1 or 2.")
-                        choice = input(
-                            "Enter 'exit' to quit or press any key to try again: "
-                        )
-                        if choice.lower() == "exit":
-                            exit()
-                    print("\nAvailable Columns:")
-                    for i, column in enumerate(data.columns):
-                        print(f"{i}. {column}")
-
-                    column_choice = int(
-                        input(
-                            "Enter the number corresponding to the column you want to visualize: "
-                        )
-                    )
-                    if 0 <= column_choice < len(data.columns):
-                        column = data.columns[column_choice]
-                        # visualize_pie_chart(data, column)
-                        thread = threading.Thread(
-                            target=visualize_pie_chart,
-                            args=(
-                                data,
-                                column,
-                            ),
-                        )
-                        thread.start()
-                        if not try_another_visualization():
-                            break
-                    else:
-                        print("Invalid choice. Please try again.")
-                else:
-                    print("Invalid choice. Please try again.")
+            # Use the same thread for preprocessing the loaded data
+            res = preprocess_data(loaded_data)
+            return res
 
         except Exception as e:
             print(f"An error occurred: {str(e)}")
@@ -219,14 +43,165 @@ def main():
                 exit()
 
 
+def print_available_columns(data):
+    print("\nAvailable Columns:")
+    for i, column in enumerate(data.columns):
+        print(f"{i}. {column}")
+
+
+def visualize_histogram(preprocessed_data, data_visualizer):
+    try:
+        data_to_visualize = (
+            preprocessed_data
+            if int(input("\nChoose type:\n1. header, 2. column values: ")) == 2
+            else data
+        )
+        print_available_columns(data_to_visualize)
+        column_choice = int(
+            input(
+                "Enter the number corresponding to the column you want to visualize: "
+            )
+        )
+        visualize_individual_column(data_to_visualize, column_choice, data_visualizer)
+    except ValueError:
+        print("Invalid input. Please enter either 1 or 2.")
+    if not try_another_visualization():
+        exit()
+
+
+def visualize_box_plot(preprocessed_data, data_visualizer):
+    try:
+        data_to_visualize = (
+            preprocessed_data
+            if int(input("\nChoose type:\n1. header, 2. column values: ")) == 2
+            else data
+        )
+        print_available_columns(data_to_visualize)
+        x_column_choice = int(
+            input("Enter the number corresponding to the x-axis column: ")
+        )
+        y_column_choice = int(
+            input("Enter the number corresponding to the y-axis column: ")
+        )
+        visualize_boxplot(
+            data_to_visualize, x_column_choice, y_column_choice, data_visualizer
+        )
+    except ValueError:
+        print("Invalid input. Please enter either 1 or 2.")
+    if not try_another_visualization():
+        exit()
+
+
+def visualize_scatter_plot(preprocessed_data, data_visualizer):
+    try:
+        data_to_visualize = (
+            preprocessed_data
+            if int(input("\nChoose type:\n1. header, 2. column values: ")) == 2
+            else data
+        )
+        print_available_columns(data_to_visualize)
+        x_column_choice = int(
+            input("Enter the number corresponding to the x-axis column: ")
+        )
+        y_column_choice = int(
+            input("Enter the number corresponding to the y-axis column: ")
+        )
+        visualize_scatterplot(
+            data_to_visualize, x_column_choice, y_column_choice, data_visualizer
+        )
+    except ValueError:
+        print("Invalid input. Please enter either 1 or 2.")
+    if not try_another_visualization():
+        exit()
+
+
+def visualize_pie_chart_plot(preprocessed_data, data_visualizer):
+    try:
+        data_to_visualize = (
+            preprocessed_data
+            if int(input("\nChoose type:\n1. header, 2. column values: ")) == 2
+            else data
+        )
+        print_available_columns(data_to_visualize)
+        column_choice = int(
+            input(
+                "Enter the number corresponding to the column you want to visualize: "
+            )
+        )
+        visualize_pie_chart(data_to_visualize, column_choice, data_visualizer)
+    except ValueError:
+        print("Invalid input. Please enter either 1 or 2.")
+    if not try_another_visualization():
+        exit()
+
+
+def visualize_individual_column(data, column_choice, data_visualizer):
+    if 0 <= column_choice < len(data.columns):
+        column = data.columns[column_choice]
+        data_visualizer.visualize_individual_column(data, column)
+
+
+def visualize_boxplot(data, x_column_choice, y_column_choice, data_visualizer):
+    if 0 <= x_column_choice < len(data.columns) and 0 <= y_column_choice < len(
+        data.columns
+    ):
+        x_column = data.columns[x_column_choice]
+        y_column = data.columns[y_column_choice]
+        data_visualizer.visualize_boxplot(data, x_column, y_column)
+
+
+def visualize_scatterplot(data, x_column_choice, y_column_choice, data_visualizer):
+    if 0 <= x_column_choice < len(data.columns) and 0 <= y_column_choice < len(
+        data.columns
+    ):
+        x_column = data.columns[x_column_choice]
+        y_column = data.columns[y_column_choice]
+        data_visualizer.visualize_scatterplot(data, x_column, y_column)
+
+
+def visualize_pie_chart(data, column_choice, data_visualizer):
+    if 0 <= column_choice < len(data.columns):
+        column = data.columns[column_choice]
+        data_visualizer.visualize_pie_chart(data, column)
+
+
 def try_another_visualization():
-    """
-    Asks the user if they want to try another visualization.
-    Returns True if yes, False otherwise.
-    """
     return (
         input("Do you want to try another visualization? (yes/no): ").lower() == "yes"
     )
+
+
+def main():
+    preprocessed_data = load_and_preprocess_data()
+    data_visualizer = DataVisualizer()
+
+    while True:
+        print("\nVisualization Options:")
+        print("1. Visualize Histogram ")
+        print("2. Visualize Box Plot ")
+        print("3. Visualize Scatter Plot ")
+        print("4. Visualize Pie Chart ")
+        print("5. Exit ")
+
+        choice = int(
+            input(
+                "Enter the number corresponding to the visualization option you want to choose: "
+            )
+        )
+
+        if choice == 5:
+            break
+        elif choice == 1:
+            visualize_histogram(preprocessed_data, data_visualizer)
+        elif choice == 2:
+            visualize_box_plot(preprocessed_data, data_visualizer)
+        elif choice == 3:
+            visualize_scatter_plot(preprocessed_data, data_visualizer)
+        elif choice == 4:
+            visualize_pie_chart_plot(preprocessed_data, data_visualizer)
+        else:
+            print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     main()
