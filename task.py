@@ -1,4 +1,3 @@
-import concurrent.futures
 from DataVisualizer import DataVisualizer
 from utils import load_data, preprocess_data
 import threading
