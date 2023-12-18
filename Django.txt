@@ -1,0 +1,209 @@
+Course Django
+	
+	#To create virtual env (create project)
+		1. virtualenv (name of the project)
+		2. python -m venv (name of the project)
+	#then active the virtual env
+		(name of virtualenv)\Scripts\activate  (enter the project then Scripts folder then activate file)
+			to know activite or not (name of the project before the prompt)
+	#then install Django
+		pip intall django
+	#then create the virtualenv (enter the folder first) (make the admin panal)(main app)
+		django-admin startproject (the name of project will have the code)
+	#then enter the project folder and write this command to run the server (using manage.py)
+		python manage.py runserver	
+	#then take the http link and open it on browser
+
+#after run the server, Django will create file sqlite3 for database
+
+#Infos
+app => like end point every end point have its own app (also there's app that hold all apps)
+	1.after creating any app must put the app in setting.py and in (INISTALLED_APPS)to connect it(join)
+	then write in this section like that ( 'pages.apps.PagesConfig')((appName).(apps.py).(class PagesConfig in apps.py)
+	, after that django can see the app
+	2.sign the project in the urls to can use this app (connect)(endpoint) and puth (include) after (path) in libraries
+	 put this in urlpatterns path('',include('pages.urls')),(1 is the name to reach endpoint if put '' then it will be the mainApp)
+	 then enter the folder (app name) and make file urls with (py extension)(urls.py), this to join the urls of this app
+	 with the urls of the whole project (pages.urls => urls means the name of the file in app)
+
+template => ready view from django
+
+context => is like map (joind with html (template)), can take this values in template (index.html)
+
+static files => get outside files and join it to files in my project the same with images and any file out the project
+must active this file in settings.py (this to make the static folder that will be used (it outer with template with admin panel (added auto))
+, to edit file don't edit in the outer, just edit in the original then run this command again (python manage.py collectstatic)
+
+
+admin panal => by wrriting admin in the url (http://127.0.0.1:8000/admin), but must to make username and password (i'm the admin of server)
+so to create user admin (python manage.py createsuperuser), then enter the username and email(any email and can be the name of my website) and password
+then run the server again and enter them to get into admin panal
+
+
+#files (in project)
+__init__.py => when load and library (import)
+settings.py => for settings (like gradle)(mindset)(VIP)
+urls.py => links (domain)(endpoints)
+asgi.py & wsgi.py => for server
+admin.py => just for the admins (create in first app)
+models.py => write in it all data that will be in database
+views.py => like main (controls all other files)(i will handle the request and response here)
+
+#commands
+python manage.py migrate => (to mirgrate the my database in sqlite3 file if there's data not in it)
+python manage.py startapp pages => to create app (pages => is the name of app)'
+
+- طريقة عمل الجانجو
+(must connect templates with views to show the template, also take the models(database))
+models---views--- template 
+- dtl language (language for django to use it in templates) (dtl => django templates language)
+- انشاء تمبلت (will find TEMPLATE variable in settings.py)
+	just when make Templates folder but must put the path in 'Dirs' (attribute)
+	can make template for each app or can make template for all the project (better)
+so created folder (templates), then put the path of the folder using os (libarary)
+and write that (os.path.join(BASE_DIR, 'templates'))
+i created folder (pages) for (app pages) to be the template of pages (app) for every app folder in template
+and made file index.html (in this case i working template)
+
+DTL:
+
+Filter:
+	using in django file (.html) and write it after | 
+	2 types of filters:
+		1.one that don't have any value ( name={{name|filter}} )
+		2.that have value ( name={{name|filter|(value)}} ), the value any thing string or int 
+Tags:
+	{%tag%} {%endtag%} to make tags like html
+
+	{%extends 'base.html'%} to inherite this attribute because base.html inside temmplate so wrote it direct
+		when use it can't write any thing in the page (name.html) must write in block
+	
+	{% block content %} {% endblock content %} to can write other code after inheritance and this be in the parent
+	any child must write the same {% block content %}{% endblock content %} if want change the name must change the parent then child
+	(content) is the name of the block (if i have many blocks)
+
+	{% include 'parts/footer.html' %} to can inherite and also the same attributes and location (block => just for attributes like color)
+	
+	{% if name == 'hussein' %} the variables be in views.py in the function that liked with this file
+	<p>Welcome</p>
+	{% elif name =='mohame'%}
+	<p>hello</p>
+	{% else %}
+	<p>not fount</p>
+	{% endif %}
+
+	{% for i in name %}
+	<p>{{i}}</p>
+	{% endfor %}
+	
+	{% load static %}  to load static files in specific file (the file that have this tag)
+
+	<span><a href="{%url 'about%}">About</a></span> to add url for text to go to this link (url) the name in urls (pages) is the name in tag
+
+	{% comment %} {% endcomment %} to make comment 
+
+
+Models: is file in every app in django and write in it the data that i want to store it in my database
+	like e-commerce (descripe my product (just example)), (don't need to learn sql just using python)
+	to add this model to database and show in admin panal (first add this model in admin.py in the same app)
+	(second by default there admin library so use it to make register to my model (admin.site.register(Product))
+	then this model apear in the admin panal (but if opened it will get error because didn't make migration (add this table to database file)
+	,so to add it (make migration to put model in django files, migrate to send it to database)(python manage.py makemigrations, python manage.py migrate)
+	to get data(show it) (first make 2 files 1 for list (products.html) another to item (product.html) in templates folder, then open views.py (in products app)
+	and make function to both of them (means web page to them and have the path) return render to show the UI, then put (urlpatterns in (urls.py of the same app))
+	(don't forget the main path in projct folder of my app is products/) then any url put in this app will be after products/(127.0.0.1:8000/product/????)here be
+	the path of views (that i wrote in urls.py in the app), i make the app to put views in it (path('product',views.product,name='Product')) like this in urls.py,
+	just to get data from database and show it in views.py(return render(request,'products/products.html',{'pro':Product.objects.all()})), sent in context (last parameter)
+	the objects (data)in the database (adminpanal OR db.sqlit3)
+
+# How models page work?
+	need to use models library and make class and put attributes with datatype in it, after making it
+	must make margration to go to database (db.sqlite3 file)(this class is table), and to write clean
+	python manage.py startapp products(name) => to make app and put the models of product in it, after that
+	add this app in (setting.py in project folder) and add this app in INSTALLED_APPS, then go to (urls.py in project folder)
+	and make url to this app (before that make url.py file in products app)
+	Types:
+	models.CharField => means String	
+	models.TextField => means String but more typing and big size (write as u want)
+	models.IntegerField => means integer(4, 5) (number)	
+	models.BigIntegerField => means Big Integer (number)
+	models.DecimalField => means decimal(4.5, 4.6) (number)
+	models.FloatField => means float (number)
+	models.ForeginKey => means for foregin key
+	models.ImageField => means for images 
+	models.OneToOneField =>
+	models.AutoField =>
+	models.UUIDField
+	....,and so on
+
+How connect tables (relationship)?
+1. one to one => girls = models.OneToOneField(Female,on_delete=models.CASCADE)
+2. one to many => Products = models.ForeignKey(Product, on_delete=models.CASCADE)
+3. many to many => watch = models.ManyToManyField(Video, null=True)
+
+How to show images in admin panal?(all that means make folder MEDIA) create when make new object
+1. In setting.py (project folder) 
+MEDIA_ROOT=os.path.join(BASE_DIR,'media')
+MEDIA_URL='/media/'
+
+2.import these in urls.py (project folder)
+from django.conf import settings
+from django.conf.urls.static import static
+
+3. add static part in urls.py (project folder)
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("pages.urls")),
+    path("products/", include("products.urls")),
+] + static(settings.MEDIA_URL, documente_root=settings.MEDIA_ROOT)
+
+4. need to put .url after the image path 
+<img src="{{i.image.url}}" alt="">
+
+5.make new object (that use the image in its class then the folder will be created), just after make all that 
+the images will appear but for the new objects not that before making these steps 
+
+Forms: (to get the data from the user and put it in the database (admin panal)) There's 3 ways to write form
+THE FIRST(1)
+1. make form in template (ex in about)
+2. make model in models to receive data (migrate after that)
+3. active receiving data from views (put data in object and assign the class in admin panal to send this object to admin panal)
+
+THE SECOND(2) easiest
+post => use if the data is very important like mail, password or payment
+get => in normal data
+
+
+VIP => (Reload get error) becuase when make reload for empty data the server can't detect the method (GET, POST, DELETE)
+so need to tell the server not impelement the method just if the method is POST (so the error in detecting)
+
+* TO Add static files (CSS,JavaScript, Bootstrap)(dist, bootstrap, plugins):
+	need take them inside folder called static (i make it in main folder (main app)) and put static folder inside
+	then need to go to settings.py and put these linse
+	STATIC_ROOT = os.path.join(
+    	BASE_DIR, "static"
+	)  # to get static files out of the app and into the project (main folder side templates so first need to put it in lms (folder of the project then do that))
+	STATICFILES_DIRS = os.path.join(BASE_DIR, "lms/static")  # the path of static folder
+Then need to write this command in terminal python manage.py collectstatic to implement new lines in settings.py
+
+* python -m pip freeze or pip freeze to show only used packages.
+* pip freeze > requirements.txt
+* pip install -r requirements.txt
+
+* Testing (coverage) (better for more infos and can get html file for missing testing parts)
+ pip install coverage
+coverage run manage.py test 	=> to test all files
+coverage report 		=> to see if required another test (100% means all tests done)
+coverage run --omit='*/venv/*' manage.py test 	=> 	to test all files except venv 
+coverage html 	=> 	to make html file (index and others) to see which parts need testing
+
+
+pip install flake8 => to check of the structure of my code (follow the guide lines or not)
+flank => command to run (check the structure)
+pip install flake8-isort => to check the order of code right or not
+isort => to run (check the order)(auto sort)
+
+pip install pillow => using in imageField to handle the type of photos need to use it
+
+py -m pip freeze > requirements.txt => to create requirements file with all used packages
+pip install -r requirements.txt => to install all packeges in the file

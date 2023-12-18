@@ -1,8 +1,11 @@
 from DataVisualizer import DataVisualizer
-from utils import load_data, preprocess_data
 import threading
+from search_algorithms import *
+import time
+from utils import load_data, preprocess_data
 
 data = None
+search = None
 
 
 def load_and_preprocess_data():
@@ -16,7 +19,8 @@ def load_and_preprocess_data():
             # Function to load data in a separate thread
             def load_data_thread():
                 nonlocal loaded_data
-                loaded_data = load_data(file_path)
+                global search
+                loaded_data, search = load_data(file_path)
 
             # Start loading data in a separate thread
             load_data_thread = threading.Thread(target=load_data_thread)
@@ -170,17 +174,76 @@ def try_another_visualization():
     )
 
 
+def run_search_algorithms(data, search_string):
+    # Split content into words
+    words = data.split()
+
+    result = []
+
+    # Create threads for each search algorithm
+    threads = [
+        threading.Thread(target=linear_search, args=(words, search_string, result)),
+        threading.Thread(
+            target=binary_search, args=(sorted(words), search_string, result)
+        ),
+        threading.Thread(
+            target=jump_search, args=(sorted(words), search_string, result)
+        ),
+    ]
+
+    # Start the threads
+    start_times = [time.time() for _ in threads]
+    for thread in threads:
+        thread.start()
+
+    # Wait for all threads to finish
+    for i, thread in enumerate(threads):
+        thread.join()
+        end_time = time.time()
+        print(f"{thread.name} finished in {end_time - start_times[i]:.4f} seconds")
+
+    # Print the results
+    for res in result:
+        print(res)
+
+
+def search_data(data):
+    search_string = input("Enter the search string: ")
+
+    # Run search algorithms in separate threads
+    run_search_algorithms(data, search_string)
+
+
 def main():
     preprocessed_data = load_and_preprocess_data()
     data_visualizer = DataVisualizer()
 
+    while True:
+        print("\nMain Menu:")
+        print("1. Visualize Data")
+        print("2. Search Data")
+        print("3. Exit")
+
+        choice = int(input("Enter the number corresponding to your choice: "))
+
+        if choice == 3:
+            break
+        elif choice == 1:
+            visualize_data_menu(preprocessed_data, data_visualizer)
+        elif choice == 2:
+            search_data(search)
+        else:
+            print("Invalid choice. Please try again.")
+
+
+def visualize_data_menu(preprocessed_data, data_visualizer):
     while True:
         print("\nVisualization Options:")
         print("1. Visualize Histogram ")
         print("2. Visualize Box Plot ")
         print("3. Visualize Scatter Plot ")
         print("4. Visualize Pie Chart ")
-        print("5. Exit ")
+        print("5. Back to Main Menu ")
 
         choice = int(
             input(
@@ -204,3 +267,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def print_available_columns(data):
+    print("\nAvailable Columns:")
+    for i, column in enumerate(data.columns):
+        print(f"{i}. {column}")

@@ -24,7 +24,7 @@ def read_data_from_db(file_path):
         query = f"SELECT * FROM {table_name}"
         data = pd.read_sql_query(query, conn)
         conn.close()
-        return data
+        return [data]
 
     except sqlite3.Error as e:
         print(f"An error occurred while reading the database: {e}")
@@ -47,7 +47,7 @@ def load_data(path):
                 "Unsupported file format. Please provide a CSV, Excel, SQL, or SQLite database file."
             )
 
-        return data
+        return data, data.to_string(index=False)
 
     except FileNotFoundError:
         print("File not found. Please provide a valid file path.")
