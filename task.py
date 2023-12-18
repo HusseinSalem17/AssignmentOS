@@ -178,6 +178,13 @@ def run_search_algorithms(data, search_string):
     # Split content into words
     words = data.split()
 
+    def convert_lower():
+        for i in range(len(words)):
+            words[i] = words[i].lower()
+
+    thread = threading.Thread(target=convert_lower)
+    thread.start()
+    thread.join()
     result = []
 
     # Create threads for each search algorithm
@@ -208,7 +215,7 @@ def run_search_algorithms(data, search_string):
 
 
 def search_data(data):
-    search_string = input("Enter the search string: ")
+    search_string = input("Enter the search string: ").lower()
 
     # Run search algorithms in separate threads
     run_search_algorithms(data, search_string)
